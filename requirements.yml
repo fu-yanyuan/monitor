@@ -1,0 +1,12 @@
+# run: conda env create -f monitor.yml
+name: monitor
+channels:
+  - defaults
+dependencies:
+  - python=3.8.8
+  - pip
+  - pip:
+      - wehcatpy
+      - requests
+      - beautifulsoup4
+      - schedule

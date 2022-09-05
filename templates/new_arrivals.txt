@@ -1,0 +1,5 @@
+u-_29nDZ3nbAQLKi2xJmrLcB6_tWILzi6y364wjGsD8
+
+KAMO 上新了以下商品
+
+{{items.DATA}}
