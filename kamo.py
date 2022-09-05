@@ -16,7 +16,7 @@ def daily_test():
 
     daily_data = {
         "datetime": {
-            "value": datetime.datetime.now(),
+            "value": str(datetime.datetime.now()),
             "color": "#173177"
         }
     }
@@ -58,7 +58,7 @@ def schedule_plan(time_list):
     for t in time_list:
         schedule.every().day.at(t).do(kamo_test, args).tag('kamo')
     print(schedule.get_jobs())
-    schedule.every().day.at('08:00').do(daily_test).tag('daily_test')
+    schedule.every().day.at('07:59').do(daily_test).tag('daily_test')
     schedule.every().day.at('23:00').do(daily_test).tag('daily_test')
 
 if __name__ == '__main__':
