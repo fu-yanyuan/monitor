@@ -16,7 +16,7 @@ def daily_test():
 
     daily_data = {
         "datetime": {
-            "value": datetime.datetime.now(),
+            "value": str(datetime.datetime.now()),
             "color": "#173177"
         }
     }
@@ -57,12 +57,13 @@ def schedule_plan(time_list):
     
     for t in time_list:
         schedule.every().day.at(t).do(kamo_test, args).tag('kamo')
-    print(schedule.get_jobs())
-    schedule.every().day.at('08:00').do(daily_test).tag('daily_test')
+    # print(schedule.get_jobs())
+    schedule.every().day.at('07:59').do(daily_test).tag('daily_test')
     schedule.every().day.at('23:00').do(daily_test).tag('daily_test')
 
 if __name__ == '__main__':
     # load configure files
+    print('running...')
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', '-c',
                             type=str,
@@ -74,7 +75,7 @@ if __name__ == '__main__':
         with open(args.config, "r") as config_file:
             configs = json.load(config_file)
     args.__dict__.update(configs)
-
+    print('config file loaded')
 
     time_list = ['08:00:10', '08:01:10', '08:30:10', '08:31:10', 
                  '09:00:10', '09:01:10', '09:30:10', '09:31:10', 
@@ -88,6 +89,7 @@ if __name__ == '__main__':
                  '17:00:10', '17:01:10', '17:30:10', '17:31:10', 
                  '18:00:10', '18:01:10', '18:30:10', '18:31:10']
     schedule_plan(time_list)
+    print('schedule planned')
 
     while True:
         schedule.run_pending()

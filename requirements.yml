@@ -1,4 +1,4 @@
-# run: conda env create -f monitor.yml
+# run: conda env create -f requirements.yml
 name: monitor
 channels:
   - defaults
