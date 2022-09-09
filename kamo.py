@@ -4,7 +4,7 @@ import schedule
 import datetime
 import time
 
-from utils import send_message, kamo_monitor
+from utils import send_message, kamo_monitor, send_text
 
 def daily_test():
     # load configure files
@@ -78,6 +78,9 @@ if __name__ == '__main__':
             configs = json.load(config_file)
     args.__dict__.update(configs)
     print('config file loaded')
+
+    send_text(args, 'start!')
+    print('initial message send')
 
     time_list = ['08:00:10', '08:01:10', '08:30:10', '08:31:10', 
                  '09:00:10', '09:01:10', '09:30:10', '09:31:10', 

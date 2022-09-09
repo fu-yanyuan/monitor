@@ -87,3 +87,7 @@ def send_message(args, data):
     except WeChatClientException as e:
         print(f'Error! Error Message: {e.errmsg} Error Code: {e.errcode}')
         exit(502)
+
+def send_text(args, text):
+    client = WeChatClient(args.appID, args.appsecret)
+    client.message.send_text(args.userID, text)
