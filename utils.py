@@ -25,7 +25,7 @@ def kamo_monitor(last_code):
     """
     kamo new arrival monitor
     """
-    url = "https://www.sskamo.co.jp/s/search/stdcdsd_enew/"
+    url = "https://www.sskamo.co.jp/s/search/cfw_stdcdsd/"
     page = requests.get(url)
     page_text = page.text
     # print(page_test)
