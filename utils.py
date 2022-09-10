@@ -5,6 +5,8 @@ from wechatpy.client.api import WeChatMessage
 import requests
 from bs4 import BeautifulSoup
 
+import json
+
 brands = {
     '[ミズノ]' : 'mizuno',
     '[ナイキ]' : 'nike',
@@ -54,11 +56,12 @@ def kamo_monitor(last_code):
 
     return lst
 
-def send_message(args, data):
+def send_template(args, templateID, data):
     """
     # appID
     # appsecret
     # templateID
+      "daily check", "new arrival", "price monitor", "hi"
     # userID
     # messages
     """
@@ -82,7 +85,7 @@ def send_message(args, data):
 
     try:
         print('Sending...')
-        res = wm.send_template(args.userID, args.templateID, data)
+        res = wm.send_template(args.userID, templateID, data)
         print('Successfully Sent!')
     except WeChatClientException as e:
         print(f'Error! Error Message: {e.errmsg} Error Code: {e.errcode}')
@@ -91,3 +94,56 @@ def send_message(args, data):
 def send_text(args, text):
     client = WeChatClient(args.appID, args.appsecret)
     client.message.send_text(args.userID, text)
+
+################### for price monitor
+
+def kamo_get_current_price(item_code):
+    """
+    input: item_code
+    return: (sale_flag, current_price, original_price)
+    """
+    url = "https://www.sskamo.co.jp/s/g/g" + item_code + "/"
+    page = requests.get(url)
+    page_text = page.text
+    soup = BeautifulSoup(page_text, 'lxml')
+    # print(soup.prettify())
+
+    price_original = soup.find("div", class_="block-goods-price--price price js-enhanced-ecommerce-goods-price")
+    if price_original: # no sale
+        price = int(price_original.text[1:-2].replace(',', ''))
+        return (0, price) # 0 means no sale
+
+    sale = soup.find("div", class_="block-goods-sale--sale price js-enhanced-ecommerce-goods-price")
+    if sale:
+        current_sale_price = int(sale.text[2:-2].replace(',', ''))
+        # original_price = int(soup.find("div", class_="block-goods-sale--price").text[2:].replace(',', ''))
+        return (1, current_sale_price)
+
+def kamo_get_original_price(item_code):
+    url = "https://www.sskamo.co.jp/s/g/g" + item_code + "/"
+    page = requests.get(url)
+    page_text = page.text
+    soup = BeautifulSoup(page_text, 'lxml')
+
+    price_original = soup.find("div", class_="block-goods-price--price price js-enhanced-ecommerce-goods-price")
+    if price_original:
+        return int(price_original.text[1:-2].replace(',', ''))
+    else:
+        return int(soup.find("div", class_="block-goods-sale--price").text[2:].replace(',', ''))
+
+def price_init(code_list):
+    """ 
+    [current, lowest, original]
+    """
+    data = {}
+    for i in code_list:
+        _, current_price = kamo_get_current_price(i)
+        original_price = kamo_get_original_price(i)
+        if current_price < original_price:
+            data[i] = [current_price, current_price, original_price]
+        else:
+            data[i] = [current_price, original_price, original_price]
+    # print(data)
+    with open("./data/price_monitor_data.json", 'w') as f:
+        json.dump(data, f, indent=4)
+
