@@ -4,15 +4,16 @@ import schedule
 import datetime
 import time
 
-from utils import send_message, kamo_monitor, send_text
+from utils import send_template, kamo_monitor, send_text
+from utils import price_init, kamo_get_current_price
 
-def daily_test():
+def daily_test(args):
     # load configure files
-    parser = argparse.ArgumentParser()
-    args2 = parser.parse_args()
-    with open('./configs/dailytest.json', "r") as config_file:
-        configs = json.load(config_file)
-    args2.__dict__.update(configs)    
+    # parser = argparse.ArgumentParser()
+    # args2 = parser.parse_args()
+    # with open('./configs/dailytest.json', "r") as config_file:
+    #     configs = json.load(config_file)
+    # args2.__dict__.update(configs)    
 
     daily_data = {
         "datetime": {
@@ -21,10 +22,10 @@ def daily_test():
         }
     }
 
-    send_message(args2, daily_data)
+    send_template(args, args.templateID['daily check'], daily_data)
     print('daily test done')
 
-def kamo_test(args):
+def kamo_new_arrival(args):
     # get last code 
     with open("./data/data.json", "r") as f:
         last_code = json.load(f)
@@ -45,12 +46,49 @@ def kamo_test(args):
             }
         }
 
-        send_message(args, data)
+        send_template(args, args.templateID["new arrival"], data)
 
         # save new last code
         last_code['kamo_lastcode'] = lst[0].code
         with open("./data/data.json", 'w') as f:
             json.dump(last_code, f, indent=4)
+
+def kamo_price_monitor(args):
+    """
+    item: [current_price, lowest_price, original_price]
+    """
+
+    with open("./data/price_monitor_data.json", "r") as f:
+        items = json.load(f)
+
+    messages = []
+    for i in items:
+        last_price, lowest_price = items[i][0], items[i][1]
+        
+        sale_flag, current_price = kamo_get_current_price(i)
+        items[i][0] = current_price
+        if sale_flag:
+            if current_price < lowest_price:
+                items[i][1] = current_price
+                messages.append(f'{i}  org:{items[i][2]}, cur is lowest:{current_price}')
+    
+    total_msg = "\n".join(messages)
+    data = {
+    "items": {
+        "value": total_msg,
+        "color": "#FF0000"
+        }
+    }
+    
+    send_template(args, args.templateID["price monitor"], data)
+
+    with open("./data/price_monitor_data.json", 'w') as f:
+        json.dump(items, f, indent=4)
+
+def kamo_test(args):
+    kamo_new_arrival(args)
+    kamo_price_monitor(args)
+    print('kamo_test done')
 
 def schedule_plan(time_list):
     schedule.clear()
@@ -60,8 +98,8 @@ def schedule_plan(time_list):
 
     # print(schedule.get_jobs())
 
-    schedule.every().day.at('07:59').do(daily_test).tag('daily_test')
-    schedule.every().day.at('23:00').do(daily_test).tag('daily_test')
+    schedule.every().day.at('07:59').do(daily_test, args).tag('daily_test')
+    schedule.every().day.at('23:00').do(daily_test, args).tag('daily_test')
 
 if __name__ == '__main__':
     # load configure files
@@ -81,6 +119,11 @@ if __name__ == '__main__':
 
     send_text(args, 'start!')
     print('initial message send')
+
+    # intialization for price monitor
+    code_list = [] # wirte the item codes here
+    price_init(code_list)
+    print('price monitor initiated')
 
     time_list = ['08:00:10', '08:01:10', '08:30:10', '08:31:10', 
                  '09:00:10', '09:01:10', '09:30:10', '09:31:10', 
