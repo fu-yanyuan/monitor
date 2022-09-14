@@ -72,15 +72,17 @@ def kamo_price_monitor(args):
                 items[i][1] = current_price
                 messages.append(f'{i}  org:{items[i][2]}, cur is lowest:{current_price}')
     
-    total_msg = "\n".join(messages)
-    data = {
-    "items": {
-        "value": total_msg,
-        "color": "#FF0000"
+    if messages != []:
+
+        total_msg = "\n".join(messages)
+        data = {
+        "items": {
+            "value": total_msg,
+            "color": "#FF0000"
+            }
         }
-    }
-    
-    send_template(args, args.templateID["price monitor"], data)
+        
+        send_template(args, args.templateID["price monitor"], data)
 
     with open("./data/price_monitor_data.json", 'w') as f:
         json.dump(items, f, indent=4)
@@ -121,7 +123,11 @@ if __name__ == '__main__':
     print('initial message send')
 
     # intialization for price monitor
-    code_list = [] # wirte the item codes here
+    code_list = ['DJ4977-001',
+                'DJ4977-343',
+                'DC0748-407',
+                'DJ4978-001',
+                '106751-01'] # wirte the item codes here
     price_init(code_list)
     print('price monitor initiated')
 
