@@ -85,7 +85,8 @@ def send_template(args, templateID, data):
 
     try:
         print('Sending...')
-        res = wm.send_template(args.userID, templateID, data)
+        for userid in args.userID:
+            res = wm.send_template(userid, templateID, data)
         print('Successfully Sent!')
     except WeChatClientException as e:
         print(f'Error! Error Message: {e.errmsg} Error Code: {e.errcode}')
@@ -93,7 +94,8 @@ def send_template(args, templateID, data):
 
 def send_text(args, text):
     client = WeChatClient(args.appID, args.appsecret)
-    client.message.send_text(args.userID, text)
+    for userid in args.userID:
+        client.message.send_text(userid, text)
 
 ################### for price monitor
 

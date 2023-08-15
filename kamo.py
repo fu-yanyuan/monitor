@@ -24,6 +24,9 @@ def daily_test(args):
 
     send_template(args, args.templateID['daily check'], daily_data)
     print('daily test done')
+    with open(log_file, 'a') as f:
+        f.write('\n')
+        f.write(f'daily test done at {str(datetime.datetime.now())}')
 
 def kamo_new_arrival(args):
     # get last code 
@@ -89,8 +92,12 @@ def kamo_price_monitor(args):
 
 def kamo_test(args):
     kamo_new_arrival(args)
-    kamo_price_monitor(args)
+    # kamo_price_monitor(args)
     print('kamo_test done')
+
+    with open(log_file, 'a') as f:
+        f.write('\n')
+        f.write(f'kamo_test done at {str(datetime.datetime.now())}')
 
 def schedule_plan(time_list):
     schedule.clear()
@@ -104,6 +111,11 @@ def schedule_plan(time_list):
     schedule.every().day.at('23:00').do(daily_test, args).tag('daily_test')
 
 if __name__ == '__main__':
+    # create log file 
+    log_file  = str(datetime.datetime.now())[:16] + '.txt'
+    with open(log_file, 'a') as log:
+        log.write(str(datetime.datetime.now()))
+
     # load configure files
     print('running...')
     parser = argparse.ArgumentParser()
@@ -119,7 +131,7 @@ if __name__ == '__main__':
     args.__dict__.update(configs)
     print('config file loaded')
 
-    send_text(args, 'start!')
+    # send_text(args, 'start!')
     print('initial message send')
 
     # intialization for price monitor
